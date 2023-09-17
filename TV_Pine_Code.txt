@@ -1,0 +1,133 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © Contributors: @thebearfib  @kiosefftrading @tradevolatility //
+//@version=5
+//
+indicator("Gamma Levels", 
+  shorttitle = '',  overlay=true)
+
+offset = input.int(10,title="Label Offset ↔️ ")
+
+
+
+_spx  = input.string(" ",         title="SPX Levels",confirm=true)
+_spy  = input.string(" ",         title="SPY Levels",confirm=true)
+_qqq  = input.string(" ",         title="QQQ Levels",confirm=true)
+_aapl = input.string(" ",         title="AAPL Levels",confirm=true)
+_amzn = input.string(" ",         title="AMZN Levels",confirm=true)
+_nflx = input.string(" ",         title="NFLX Levels",confirm=true)
+_nvda = input.string(" ",         title="NVDA Levels",confirm=true)
+_meta = input.string(" ",         title="META Levels",confirm=true)
+_tsla = input.string(" ",         title="TSLA Levels",confirm=true)
+_wild = input.string(" ",         title="WILD Levels",confirm=true)
+
+
+txt = switch 
+    syminfo.ticker == "SPX"   => _spx
+    syminfo.ticker == "SPY"   => _spy
+    syminfo.ticker == "QQQ"   => _qqq
+    syminfo.ticker == "AAPL"  => _aapl
+    syminfo.ticker == "AMZN"  => _amzn
+    syminfo.ticker == "NFLX"  => _nflx
+    syminfo.ticker == "NVDA"  => _nvda
+    syminfo.ticker == "META"  => _meta
+    syminfo.ticker == "TSLA"  => _tsla
+    syminfo.ticker != "*"  => _wild
+    
+
+color0=input.color(defval=color.rgb(255, 75, 237),              title="GEX Flip",           group="Fixed Colors")
+color1=input.color(defval=color.rgb(255, 246, 72, 10),          title="GEX-0",              group="Fixed Colors")
+color2=input.color(defval=color.rgb(255, 246, 72, 20),          title="GEX-1",              group="Fixed Colors")
+color3=input.color(defval=color.rgb(255, 246, 72, 30),          title="GEX-2",              group="Fixed Colors")
+color4=input.color(defval=color.rgb(255, 255, 72, 50),          title="GEX-3",              group="Fixed Colors")
+color5=input.color(defval=color.rgb(76, 180, 255, 30),          title="+1STD (1-day)",      group="Fixed Colors")
+color6=input.color(defval=color.rgb(76, 180, 255, 30),          title="-1STD (1-day)",      group="Fixed Colors")
+color7=input.color(defval=color.rgb(76, 144, 175, 40),          title="+1STD (7-day)",      group="Fixed Colors")
+color8=input.color(defval=color.rgb(76, 144, 175, 40),          title="-1STD (7-day)",      group="Fixed Colors")
+color9=input.color(defval=color.rgb(76, 144, 175),              title="NA",                 group="Fixed Colors")
+
+
+_mutedColors=input.bool(false,              title=" ",                          group="Muted Colors", inline = '1') 
+_mutedColorsC=input.color(color.gray,     title="Muted Line Colors",          group="Muted Colors", inline = '1')
+
+TxtToArray(string origin,string divider) =>
+    Arr = array.new_string()
+    Arr:= str.split(origin,divider)
+    Arr
+
+Dividedstrings=TxtToArray(txt,",")
+color temporarycolor=na
+
+plot(array.size(Dividedstrings)>=2  ? str.tonumber(array.get(Dividedstrings,1))  : na,title="GEX Flip",      linewidth=1,   style =plot.style_line,     color=_mutedColors ? _mutedColorsC : color0,     display=display.all)
+plot(array.size(Dividedstrings)>=4  ? str.tonumber(array.get(Dividedstrings,3))  : na,title="GEX-0",         linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color1,     display=display.all)
+plot(array.size(Dividedstrings)>=6  ? str.tonumber(array.get(Dividedstrings,5))  : na,title="GEX-1",         linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color2,     display=display.all)
+plot(array.size(Dividedstrings)>=8  ? str.tonumber(array.get(Dividedstrings,7))  : na,title="GEX-2",         linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color3,     display=display.all)
+plot(array.size(Dividedstrings)>=10 ? str.tonumber(array.get(Dividedstrings,9))  : na,title="GEX-3",         linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color4,     display=display.all)
+plot(array.size(Dividedstrings)>=12 ? str.tonumber(array.get(Dividedstrings,11)) : na,title="+1STD (1-day)", linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color5,     display=display.all)
+plot(array.size(Dividedstrings)>=14 ? str.tonumber(array.get(Dividedstrings,13)) : na,title="-1STD (1-day)", linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color6,     display=display.all)
+plot(array.size(Dividedstrings)>=16 ? str.tonumber(array.get(Dividedstrings,15)) : na,title="+1STD (7-day)", linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color7,     display=display.all)
+plot(array.size(Dividedstrings)>=18 ? str.tonumber(array.get(Dividedstrings,17)) : na,title="-1STD (7-day)", linewidth=1,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color8,     display=display.all)
+plot(array.size(Dividedstrings)>=20 ? str.tonumber(array.get(Dividedstrings,19)) : na,title="NA",            linewidth=4,   style =plot.style_line,  color=_mutedColors ? _mutedColorsC : color9,     display=display.all)
+
+nb_bars = ta.barssince(time == chart.right_visible_bar_time)
+if barstate.islastconfirmedhistory and array.size(Dividedstrings)!=0 
+    for i=0 to array.size(Dividedstrings)-1
+        
+        if i%2==0
+            temporarycolor:=color.rgb(math.random(0,255),math.random(0,255),math.random(0,255))
+        if _mutedColors==false
+            if i==0 or i==1 
+                temporarycolor:=color0
+            if i==2 or i==3
+                temporarycolor:=color1
+            if i==4 or i==5
+                temporarycolor:=color2
+            if i==6 or i==7
+                temporarycolor:=color3
+            if i==8 or i==9
+                temporarycolor:=color4
+            if i==10 or i==11
+                temporarycolor:=color5
+            if i==12 or i==13
+                temporarycolor:=color6
+            if i==14 or i==15
+                temporarycolor:=color7
+            if i==16 or i==17
+                temporarycolor:=color8
+            if i==18 or i==19
+                temporarycolor:=color9
+            
+        if i%2==0
+            label.new(bar_index+offset,str.tonumber(array.get(Dividedstrings,i+1)),array.get(Dividedstrings,i),xloc=xloc.bar_index,color=color.new(color.white,10),size=size.large,
+             style=label.style_none,textcolor=temporarycolor,textalign=text.align_left)
+        if i%2!=0
+            line.new(bar_index,str.tonumber(array.get(Dividedstrings,i)),bar_index+1,str.tonumber(array.get(Dividedstrings,i)), style=line.style_dotted,extend=extend.right,color=temporarycolor)
+
+
+
+showxAx       = input.bool(defval = true, title = " ",
+  group='ᴍᴏᴠᴇ ᴛᴀʙʟᴇ INSTRUCTIONS', inline='1')
+
+
+position3d   = input.string("Bottom Center","HIDE INSTRUCTIONS",
+  options = ["Top Right", "Top Center", "Top Left", "Middle Right", "Middle Center", "Middle Left", "Bottom Right", "Bottom Center", "Bottom Left"],
+  group='ᴍᴏᴠᴇ ᴛᴀʙʟᴇ INSTRUCTIONS', inline='1')
+
+tableposGo3d = switch position3d
+    
+    "Top Right"     => position.top_right
+    "Top Center"    => position.top_center
+    "Top Left"      => position.top_left
+    "Middle Right"  => position.middle_right
+    "Middle Center" => position.middle_center
+    "Middle Left"   => position.middle_left
+    "Bottom Right"  => position.bottom_right
+    "Bottom Center" => position.bottom_center
+    "Bottom Left"   => position.bottom_left
+
+if barstate.islast or barstate.islastconfirmedhistory
+    var table tabuA = table.new(tableposGo3d, 99, 99,
+      bgcolor = color.rgb(255, 255, 255, 100),  
+      frame_color=color.rgb(255, 255, 255, 100),
+      frame_width = 1,  
+      border_color =color.rgb(255, 255, 255, 100),
+      border_width = 1)
