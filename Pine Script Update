@@ -1,0 +1,70 @@
+# Import the necessary libraries
+import pandas as pd
+
+# Define the path names for the CSV and TXT files
+csv_path = 'your_path/stock_symbols.csv'
+txt_path = 'your_path/TV_Pine_Code.txt'
+
+# Read the stock symbols from the CSV file
+df = pd.read_csv(csv_path)
+stock_symbols = df['Stock_Symbols'].tolist()
+
+# Read the existing Pine Script code from the TXT file
+with open(txt_path, 'r') as file:
+    tv_pine_code = file.read()
+
+# Define the existing blocks of code for input.string definitions and syminfo.ticker conditionals
+existing_input_strings = '''_spx  = input.string(" ",         title="SPX Levels",confirm=true)
+_spy  = input.string(" ",         title="SPY Levels",confirm=true)
+_qqq  = input.string(" ",         title="QQQ Levels",confirm=true)
+_aapl = input.string(" ",         title="AAPL Levels",confirm=true)
+_amzn = input.string(" ",         title="AMZN Levels",confirm=true)
+_nflx = input.string(" ",         title="NFLX Levels",confirm=true)
+_nvda = input.string(" ",         title="NVDA Levels",confirm=true)
+_meta = input.string(" ",         title="META Levels",confirm=true)
+_tsla = input.string(" ",         title="TSLA Levels",confirm=true)
+_wild = input.string(" ",         title="WILD Levels",confirm=true)'''
+
+existing_syminfo_tickers = '''syminfo.ticker == "SPX"   => _spx
+syminfo.ticker == "SPY"   => _spy
+syminfo.ticker == "QQQ"   => _qqq
+syminfo.ticker == "AAPL"  => _aapl
+syminfo.ticker == "AMZN"  => _amzn
+syminfo.ticker == "NFLX"  => _nflx
+syminfo.ticker == "NVDA"  => _nvda
+syminfo.ticker == "META"  => _meta
+syminfo.ticker == "TSLA"  => _tsla
+syminfo.ticker != "*"  => _wild'''
+
+# Generate new lines for input.string definitions and syminfo.ticker conditionals
+new_input_strings = []
+new_syminfo_tickers = []
+for symbol in stock_symbols:
+    new_input_strings.append(f'_{symbol.lower()}  = input.string(" ",         title="{symbol} Levels",confirm=true)')
+    new_syminfo_tickers.append(f'syminfo.ticker == "{symbol}"   => _{symbol.lower()}')
+
+# Join the lines with newlines to form blocks of code
+new_input_strings_block = '\n'.join(new_input_strings)
+new_syminfo_tickers_block = '\n'.join(new_syminfo_tickers)
+
+# Replace the existing blocks with the new blocks in the Pine Script
+tv_pine_code_replaced = tv_pine_code.replace(existing_input_strings, new_input_strings_block)
+tv_pine_code_replaced = tv_pine_code_replaced.replace(existing_syminfo_tickers, new_syminfo_tickers_block)
+
+# Save the replaced Pine Script code to a new text file
+tv_pine_code_replaced_path = 'your_path/TV_Pine_Code_Replaced.txt'
+with open(tv_pine_code_replaced_path, 'w') as file:
+    file.write(tv_pine_code_replaced)
+
+# To replace the "txt = switch" section with the new conditionals, locate this section in the existing code and replace it.
+start_index = tv_pine_code_replaced.find("txt = switch")
+end_index = tv_pine_code_replaced.find('syminfo.ticker != "*"  => _wild')
+existing_txt_switch_section = tv_pine_code_replaced[start_index:end_index + len('syminfo.ticker != "*"  => _wild')]
+
+new_txt_switch_section = "txt = switch\n    " + new_syminfo_tickers_block.replace("\n", "\n    ")
+tv_pine_code_replaced_with_new_txt_switch = tv_pine_code_replaced.replace(existing_txt_switch_section, new_txt_switch_section)
+
+# Save the updated Pine Script code to a new text file
+tv_pine_code_replaced_with_new_txt_switch_path = 'your_path/Complete_Pine_Code.txt'
+with open(tv_pine_code_replaced_with_new_txt_switch_path, 'w') as file:
+    file.write(tv_pine_code_replaced_with_new_txt_switch)
