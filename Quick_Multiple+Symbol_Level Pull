@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 # Read the CSV into a DataFrame
-csv_filepath = 'You_Path'  # Your file path
+csv_filepath = 'your_path/stock_symbols.csv'  # Your file path
 df = pd.read_csv(csv_filepath)
 
 # Convert the 'Stock_Symbols' column to a list of tickers
