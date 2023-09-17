@@ -49,7 +49,7 @@ results = {}
 # Loop through the tickers and make a request for each
 for ticker in tickers:
     params = {
-        'username': 'I-RWFNBLR2S1DP',  # Replace with your actual API key
+        'username': 'Your_API_Key',  # Replace with your actual API key
         'ticker': ticker,
         'format': 'TRVIEW'
     }
